@@ -13,12 +13,32 @@ describe UsersController do
       get :new
       response.should have_tag("title", /Sign up/)
     end
+    
+    it "should have the name field" do
+      get :new
+      response.should have_tag("input[name=?][type=?]", "user[name]", "text")
+    end
+    
+    it "should have the email field" do
+      get :new
+      response.should have_tag("input[name=?][type=?]", "user[email]", "text")
+    end
+    
+    it "should have the password field" do
+      get :new
+      response.should have_tag("input[name=?][type=?]", "user[password]", "password")
+    end
+    
+    it "should have the password confirmation field" do
+      get :new
+      response.should have_tag("input[name=?][type=?]", "user[password_confirmation]", "password")
+    end
   end
   
   describe "POST 'create'" do
     describe "failure" do
       before(:each) do
-        @attr = { :name => "", :email => "", :password => "", :password_confirmation => "" }
+        @attr = { :name => "", :email => "", :password => "x", :password_confirmation => "x" }
         @user = Factory.build(:user, @attr)
         User.stub!(:new).and_return(@user)
         @user.should_receive(:save).and_return(false)
@@ -32,6 +52,12 @@ describe UsersController do
       it "should render the 'new' page" do
         post :create, :user => @attr
         response.should render_template('new')
+      end
+      
+      it "should clear the password and password confirmation fields" do
+        post :create, :user => @attr
+        response.should have_tag("input[name=?][value=?]", "user[password]", "")
+        response.should have_tag("input[name=?][value=?]", "user[password_confirmation]", "")
       end
     end
     
