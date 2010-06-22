@@ -11,10 +11,9 @@ module ApplicationHelper
     end
   end
   
-  # Return a logo with a link to the Home page.
+  # Return a logo image tag
   def logo
-    logo = image_tag("logo.png", :alt => "Sample App", :class => "round")
-    link_to logo, root_path
+    image_tag("logo.png", :alt => "Sample App", :class => "round")
   end
   
 end
