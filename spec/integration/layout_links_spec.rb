@@ -63,9 +63,19 @@ describe "Layout links" do
       response.should have_tag("a[href=?]", signout_path, "Sign out")
     end
     
+    it "should have a users link" do
+      visit root_path
+      response.should have_tag("a[href=?]", users_path, "Users")
+    end
+    
     it "should have a profile link" do
       visit root_path
       response.should have_tag("a[href=?]", user_path(@user), "Profile")
+    end
+    
+    it "should have a settings link" do
+      visit root_path
+      response.should have_tag("a[href=?]", edit_user_path(@user), "Settings")
     end
   end
 end
