@@ -262,6 +262,32 @@ describe UsersController do
         response.should have_tag("a[href=?]", "/users?page=2", "2")
         response.should have_tag("a[href=?]", "/users?page=2", "Next &raquo;")
       end
+      
+      it "should not show delete links" do
+        get :index
+        @users.each do |user|
+          response.should_not have_tag("a[href=?]", "/users/#{user}", /delete/)
+        end
+      end
+    end
+    
+    describe "for admin users" do
+      before(:each) do
+        @admin = Factory(:user, :email => "admin@example.com", :admin => true)
+        test_sign_in(@admin)
+        @users = [@admin]
+        5.times do
+          @users << Factory(:user, :email => Factory.next(:email))
+        end
+        User.should_receive(:paginate).and_return(@users.paginate)
+      end
+      
+      it "should have a delete link for each user" do
+        get :index
+        @users.each do |user|
+          response.should have_tag("a[href=?]", "/users/#{user.id}", /delete/)
+        end
+      end
     end
   end
   
@@ -287,15 +313,22 @@ describe UsersController do
     
     describe "as an admin user" do
       before(:each) do
-        admin = Factory(:user, :email => "admin@example.com", :admin => true)
-        test_sign_in(admin)
-        User.should_receive(:find).and_return(@user)
-        @user.should_receive(:destroy).and_return(@user)
+        @admin = Factory(:user, :email => "admin@example.com", :admin => true)
+        test_sign_in(@admin)
       end
       
       it "should destroy the user" do
+        User.should_receive(:find).and_return(@user)
+        @user.should_receive(:destroy).and_return(@user)
         delete :destroy, :id => @user
         response.should redirect_to(users_path)
+      end
+      
+      it "should prevent the admin from destroying themselves" do
+        User.should_receive(:find).and_return(@admin)
+        delete :destroy, :id => @admin
+        response.should redirect_to(users_path)
+        flash[:error].should =~ /cannot destroy yourself/i
       end
     end
   end
