@@ -112,6 +112,14 @@ describe UsersController do
       get :show, :id => @user
       response.should have_tag("h2>img", :class => "gravatar")
     end
+    
+    it "should show the user's microposts" do
+      mp1 = Factory(:micropost, :user => @user, :content => "foo bar")
+      mp2 = Factory(:micropost, :user => @user, :content => "baz quux")
+      get :show, :id => @user
+      response.should have_tag("span.content", mp1.content)
+      response.should have_tag("span.content", mp2.content)
+    end
   end
   
   describe "GET 'edit'" do
