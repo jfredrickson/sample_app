@@ -50,4 +50,36 @@ describe Micropost do
       @user.microposts.build(:content => "a" * 141).should_not be_valid
     end
   end
+  
+  describe "from_users_followed_by" do
+    before(:each) do
+      @second_user = Factory(:user, :email => Factory.next(:email))
+      @third_user = Factory(:user, :email => Factory.next(:email))
+      
+      @user_post = @user.microposts.create!(:content => "foo")
+      @second_user_post = @second_user.microposts.create!(:content => "bar")
+      @third_user_post = @third_user.microposts.create!(:content => "baz")
+      
+      @user.follow!(@second_user)
+    end
+    
+    it "should have a from_users_followed_by class method" do
+      Micropost.should respond_to(:from_users_followed_by)
+    end
+    
+    it "should include the followed user's microposts" do
+      @posts = Micropost.from_users_followed_by(@user)
+      @posts.include?(@second_user_post).should be_true
+    end
+    
+    it "should include the user's own microposts" do
+      @posts = Micropost.from_users_followed_by(@user)
+      @posts.include?(@user_post).should be_true
+    end
+    
+    it "should not include an unfollowed user's microposts" do
+      @posts = Micropost.from_users_followed_by(@user)
+      @posts.include?(@third_user_post).should be_false
+    end
+  end
 end

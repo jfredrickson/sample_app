@@ -29,7 +29,6 @@ describe "Microposts" do
           visit root_path
           fill_in :micropost_content, :with => content
           click_button
-          response.should redirect_to root_path
           response.should have_tag("span.content", content)
         end.should change(Micropost, :count).by(1)
       end
